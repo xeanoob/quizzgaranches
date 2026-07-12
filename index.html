@@ -4,10 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Quiz — Domaine de Garanches</title>
-  <meta name="description" content="Testez vos connaissances sur le Domaine de Garanches après votre visite. Quiz interactif sur les vins de Brouilly et le terroir d'Odenas.">
+  <meta name="description" content="Testez vos connaissances sur le Domaine de Garanches après votre visite.">
   <meta name="theme-color" content="#fafaf9">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="manifest" href="/manifest.json">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -16,7 +17,6 @@
       --wine: #7f1d1d;
       --wine-light: #991b1b;
       --gold: #b45309;
-      --gold-light: #d97706;
       --stone-50: #fafaf9;
       --stone-100: #f5f5f4;
       --stone-200: #e7e5e4;
@@ -27,22 +27,18 @@
       --stone-700: #44403c;
       --stone-800: #292524;
       --stone-900: #1c1917;
-      --correct: #166534;
-      --correct-bg: #f0fdf4;
-      --correct-border: #bbf7d0;
-      --incorrect: #991b1b;
-      --incorrect-bg: #fef2f2;
-      --incorrect-border: #fecaca;
+      --ok: #166534;
+      --ok-bg: #f0fdf4;
+      --ok-border: #bbf7d0;
+      --ko: #991b1b;
+      --ko-bg: #fef2f2;
+      --ko-border: #fecaca;
       --serif: 'Playfair Display', Georgia, serif;
       --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     }
 
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html {
-      -webkit-text-size-adjust: 100%;
-      -webkit-tap-highlight-color: transparent;
-    }
+    html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 
     body {
       font-family: var(--sans);
@@ -54,47 +50,33 @@
       -webkit-font-smoothing: antialiased;
     }
 
-    ::selection { background: var(--wine); color: white; }
+    ::selection { background: var(--wine); color: #fff; }
 
-    /* ── Layout ── */
-    #app {
-      min-height: 100dvh;
-      display: flex;
-      flex-direction: column;
-    }
+    #app { min-height: 100dvh; display: flex; flex-direction: column; }
 
-    .screen {
-      display: none;
-      flex-direction: column;
-      flex: 1;
-      opacity: 0;
-      transition: opacity 0.4s ease;
-    }
-    .screen.active { display: flex; opacity: 1; }
+    .screen { display: none; flex-direction: column; flex: 1; }
+    .screen.active { display: flex; }
 
-    /* ── Header Bar ── */
-    .top-bar {
+    /* ── Top bar ── */
+    .bar {
       padding: 20px 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-bottom: 1px solid var(--stone-200);
-      background: white;
+      background: #fff;
     }
-
-    .top-bar-brand {
+    .bar span {
       font-family: var(--serif);
       font-size: 13px;
       font-weight: 500;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: .18em;
       color: var(--stone-900);
     }
 
-    /* ═══════════════════════════════════════
-       WELCOME
-       ═══════════════════════════════════════ */
-    .welcome {
+    /* ── Shared ── */
+    .page-center {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -104,7 +86,7 @@
       text-align: center;
     }
 
-    .welcome-eyebrow {
+    .eyebrow {
       font-family: var(--serif);
       font-style: italic;
       font-size: 15px;
@@ -112,7 +94,7 @@
       margin-bottom: 12px;
     }
 
-    .welcome-title {
+    .heading {
       font-family: var(--serif);
       font-size: 30px;
       font-weight: 500;
@@ -121,14 +103,14 @@
       margin-bottom: 20px;
     }
 
-    .welcome-line {
+    .sep {
       width: 48px;
       height: 1px;
       background: var(--stone-300);
       margin: 0 auto 24px;
     }
 
-    .welcome-text {
+    .desc {
       font-size: 14px;
       font-weight: 300;
       line-height: 1.8;
@@ -137,15 +119,15 @@
       margin-bottom: 36px;
     }
 
-    .welcome-info {
-      display: flex;
-      gap: 32px;
-      margin-bottom: 40px;
+    .foot {
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid var(--stone-200);
+    }
+    .foot p {
       font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      font-weight: 500;
       color: var(--stone-400);
+      letter-spacing: .05em;
     }
 
     /* ── Buttons ── */
@@ -159,85 +141,142 @@
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.18em;
+      letter-spacing: .18em;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all .25s ease;
       border: none;
       min-height: 52px;
       text-decoration: none;
     }
+    .btn-w { background: var(--wine); color: #fff; }
+    .btn-w:active { background: var(--wine-light); }
+    .btn-o { background: transparent; color: var(--stone-900); border: 1px solid var(--stone-300); }
+    .btn-o:active { background: var(--stone-100); }
+    .btn-f { width: 100%; max-width: 320px; }
+    .btn:disabled { opacity: .4; pointer-events: none; }
 
-    .btn-wine {
-      background: var(--wine);
-      color: white;
-    }
-    .btn-wine:active { background: var(--wine-light); }
-
-    .btn-outline {
-      background: transparent;
-      color: var(--stone-900);
-      border: 1px solid var(--stone-300);
-    }
-    .btn-outline:active { background: var(--stone-100); }
-
-    .btn-full { width: 100%; max-width: 320px; }
-
-    /* ── Footer ── */
-    .page-footer {
-      padding: 24px;
-      text-align: center;
-      border-top: 1px solid var(--stone-200);
-    }
-
-    .page-footer p {
+    .info-row {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 40px;
       font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-weight: 500;
       color: var(--stone-400);
-      letter-spacing: 0.05em;
     }
+
+    /* ═══════════════════════════════════════
+       CONTACT FORM
+       ═══════════════════════════════════════ */
+    .form-group {
+      width: 100%;
+      max-width: 320px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: var(--stone-500);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 14px 18px;
+      background: #fff;
+      border: 1px solid var(--stone-200);
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 15px;
+      font-weight: 400;
+      color: var(--stone-900);
+      transition: border-color .25s ease;
+      outline: none;
+      -webkit-appearance: none;
+    }
+
+    .form-input::placeholder { color: var(--stone-300); }
+    .form-input:focus { border-color: var(--wine); }
+
+    .form-skip {
+      margin-top: 12px;
+      background: none;
+      border: none;
+      font-family: var(--sans);
+      font-size: 12px;
+      color: var(--stone-400);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .form-skip:active { color: var(--stone-600); }
 
     /* ═══════════════════════════════════════
        QUIZ
        ═══════════════════════════════════════ */
-    .quiz-progress-track {
-      width: 100%;
-      height: 2px;
-      background: var(--stone-200);
-    }
+    .q-progress-track { width: 100%; height: 2px; background: var(--stone-200); }
+    .q-progress-fill { height: 100%; background: var(--wine); transition: width .5s ease; }
 
-    .quiz-progress-fill {
-      height: 100%;
-      background: var(--wine);
-      transition: width 0.5s ease;
-    }
-
-    .quiz-body {
+    .q-body {
       flex: 1;
       display: flex;
       flex-direction: column;
       padding: 28px 24px 32px;
     }
 
-    .quiz-meta {
+    .q-meta {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
+      margin-bottom: 24px;
     }
 
-    .quiz-step {
+    .q-step {
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       font-weight: 500;
       color: var(--stone-400);
     }
+    .q-step strong { color: var(--stone-900); font-weight: 600; }
 
-    .quiz-step strong {
-      color: var(--stone-900);
-      font-weight: 600;
+    /* Timer */
+    .q-timer {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      color: var(--stone-500);
+      transition: color .3s ease;
     }
+    .q-timer.warn { color: var(--ko); }
+    .q-timer svg { width: 14px; height: 14px; }
 
-    .quiz-question {
+    .q-timer-bar {
+      width: 100%;
+      height: 2px;
+      background: var(--stone-100);
+      margin-bottom: 28px;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    .q-timer-fill {
+      height: 100%;
+      background: var(--stone-300);
+      transition: width .25s linear, background-color .3s ease;
+      border-radius: 1px;
+    }
+    .q-timer-fill.warn { background: var(--ko); }
+
+    .q-question {
       font-family: var(--serif);
       font-size: 21px;
       font-weight: 400;
@@ -246,17 +285,12 @@
       margin-bottom: 32px;
     }
 
-    .quiz-options {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      flex: 1;
-    }
+    .q-opts { display: flex; flex-direction: column; gap: 10px; flex: 1; }
 
-    .option {
+    .opt {
       width: 100%;
       padding: 16px 20px;
-      background: white;
+      background: #fff;
       border: 1px solid var(--stone-200);
       border-radius: 10px;
       font-family: var(--sans);
@@ -265,21 +299,17 @@
       color: var(--stone-800);
       text-align: left;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: all .2s ease;
       min-height: 52px;
       display: flex;
       align-items: center;
       gap: 14px;
     }
 
-    .option:active:not(.locked) {
-      background: var(--stone-100);
-      border-color: var(--stone-300);
-    }
+    .opt:active:not(.lk) { background: var(--stone-100); border-color: var(--stone-300); }
 
-    .option-marker {
-      width: 28px;
-      height: 28px;
+    .opt-m {
+      width: 28px; height: 28px;
       border-radius: 50%;
       border: 1.5px solid var(--stone-300);
       display: flex;
@@ -289,50 +319,21 @@
       font-weight: 600;
       color: var(--stone-400);
       flex-shrink: 0;
-      transition: all 0.25s ease;
+      transition: all .2s ease;
     }
 
-    .option-label { flex: 1; }
+    .opt-t { flex: 1; }
 
-    /* States */
-    .option.is-correct {
-      background: var(--correct-bg);
-      border-color: var(--correct-border);
-      color: var(--correct);
-    }
-    .option.is-correct .option-marker {
-      background: var(--correct);
-      border-color: var(--correct);
-      color: white;
-    }
+    .opt.ok { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok); }
+    .opt.ok .opt-m { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .opt.ko { background: var(--ko-bg); border-color: var(--ko-border); color: var(--ko); }
+    .opt.ko .opt-m { background: var(--ko); border-color: var(--ko); color: #fff; }
+    .opt.rv { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok); }
+    .opt.rv .opt-m { border-color: var(--ok); color: var(--ok); }
+    .opt.lk { pointer-events: none; }
+    .opt.lk:not(.ok):not(.ko):not(.rv) { opacity: .4; }
 
-    .option.is-wrong {
-      background: var(--incorrect-bg);
-      border-color: var(--incorrect-border);
-      color: var(--incorrect);
-    }
-    .option.is-wrong .option-marker {
-      background: var(--incorrect);
-      border-color: var(--incorrect);
-      color: white;
-    }
-
-    .option.is-reveal {
-      background: var(--correct-bg);
-      border-color: var(--correct-border);
-      color: var(--correct);
-    }
-    .option.is-reveal .option-marker {
-      border-color: var(--correct);
-      color: var(--correct);
-    }
-
-    .option.locked { pointer-events: none; }
-    .option.locked:not(.is-correct):not(.is-wrong):not(.is-reveal) {
-      opacity: 0.4;
-    }
-
-    .quiz-feedback {
+    .q-fb {
       margin-top: 16px;
       padding: 14px 18px;
       border-radius: 8px;
@@ -341,25 +342,14 @@
       line-height: 1.6;
       display: none;
     }
-
-    .quiz-feedback.show { display: block; }
-
-    .quiz-feedback.ok {
-      background: var(--correct-bg);
-      border: 1px solid var(--correct-border);
-      color: var(--correct);
-    }
-
-    .quiz-feedback.ko {
-      background: var(--incorrect-bg);
-      border: 1px solid var(--incorrect-border);
-      color: var(--incorrect);
-    }
+    .q-fb.show { display: block; }
+    .q-fb.is-ok { background: var(--ok-bg); border: 1px solid var(--ok-border); color: var(--ok); }
+    .q-fb.is-ko { background: var(--ko-bg); border: 1px solid var(--ko-border); color: var(--ko); }
 
     /* ═══════════════════════════════════════
        RESULTS
        ═══════════════════════════════════════ */
-    .results-body {
+    .r-body {
       flex: 1;
       display: flex;
       flex-direction: column;
@@ -367,72 +357,19 @@
       padding: 40px 28px 32px;
     }
 
-    .results-eyebrow {
-      font-family: var(--serif);
-      font-style: italic;
-      font-size: 15px;
-      color: var(--gold);
-      margin-bottom: 8px;
-    }
-
-    .results-heading {
-      font-family: var(--serif);
-      font-size: 28px;
-      font-weight: 500;
-      color: var(--stone-900);
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .results-score-block {
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
-      margin-bottom: 8px;
-    }
-
-    .results-score-big {
-      font-family: var(--serif);
-      font-size: 64px;
-      font-weight: 500;
-      color: var(--wine);
-      line-height: 1;
-    }
-
-    .results-score-total {
-      font-family: var(--serif);
-      font-size: 24px;
-      color: var(--stone-400);
-      font-weight: 400;
-    }
-
-    .results-score-label {
+    .r-score-block { display: flex; align-items: baseline; gap: 6px; margin-bottom: 8px; }
+    .r-big { font-family: var(--serif); font-size: 64px; font-weight: 500; color: var(--wine); line-height: 1; }
+    .r-total { font-family: var(--serif); font-size: 24px; color: var(--stone-400); }
+    .r-label {
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       font-weight: 500;
       color: var(--stone-400);
       margin-bottom: 28px;
     }
 
-    .results-line {
-      width: 48px;
-      height: 1px;
-      background: var(--stone-300);
-      margin-bottom: 24px;
-    }
-
-    .results-text {
-      font-size: 14px;
-      font-weight: 300;
-      line-height: 1.8;
-      color: var(--stone-500);
-      text-align: center;
-      max-width: 320px;
-      margin-bottom: 36px;
-    }
-
-    .results-actions {
+    .r-actions {
       width: 100%;
       max-width: 320px;
       display: flex;
@@ -441,8 +378,8 @@
       margin-bottom: 36px;
     }
 
-    /* ── Recap ── */
-    .recap-header {
+    /* Recap */
+    .rc-btn {
       width: 100%;
       max-width: 380px;
       padding: 14px 0;
@@ -455,22 +392,15 @@
       font-family: var(--sans);
       font-size: 11px;
       text-transform: uppercase;
-      letter-spacing: 0.12em;
+      letter-spacing: .12em;
       font-weight: 600;
       color: var(--stone-500);
       border-top: 1px solid var(--stone-200);
     }
+    .rc-btn svg { width: 14px; height: 14px; stroke: var(--stone-400); transition: transform .25s ease; }
+    .rc-btn.open svg { transform: rotate(180deg); }
 
-    .recap-header svg {
-      width: 14px;
-      height: 14px;
-      stroke: var(--stone-400);
-      transition: transform 0.25s ease;
-    }
-
-    .recap-header.open svg { transform: rotate(180deg); }
-
-    .recap-items {
+    .rc-list {
       width: 100%;
       max-width: 380px;
       display: none;
@@ -478,321 +408,398 @@
       gap: 8px;
       padding: 8px 0 16px;
     }
+    .rc-list.show { display: flex; }
 
-    .recap-items.show { display: flex; }
-
-    .recap-card {
+    .rc-card {
       padding: 14px 16px;
-      background: white;
+      background: #fff;
       border-radius: 8px;
       border: 1px solid var(--stone-200);
       border-left: 3px solid;
     }
+    .rc-card.is-ok { border-left-color: var(--ok); }
+    .rc-card.is-ko { border-left-color: var(--ko); }
+    .rc-q { font-size: 13px; font-weight: 500; color: var(--stone-700); margin-bottom: 6px; line-height: 1.4; }
+    .rc-a { font-size: 12px; color: var(--stone-400); line-height: 1.4; }
+    .rc-a strong { color: var(--ok); font-weight: 600; }
+    .rc-a .w { color: var(--ko); }
 
-    .recap-card.ok { border-left-color: var(--correct); }
-    .recap-card.ko { border-left-color: var(--incorrect); }
-
-    .recap-card-q {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--stone-700);
-      margin-bottom: 6px;
-      line-height: 1.4;
-    }
-
-    .recap-card-a {
+    /* ── Offline banner ── */
+    .offline-banner {
+      display: none;
+      padding: 10px 24px;
+      background: var(--stone-800);
+      color: var(--stone-300);
       font-size: 12px;
-      color: var(--stone-400);
-      line-height: 1.4;
+      text-align: center;
+      font-weight: 500;
+      letter-spacing: .02em;
     }
-
-    .recap-card-a strong { color: var(--correct); font-weight: 600; }
-    .recap-card-a .wrong { color: var(--incorrect); }
+    .offline-banner.show { display: block; }
 
     /* ── Animations ── */
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
     }
-
-    .fade-up { animation: fadeUp 0.35s ease both; }
+    .fu { animation: fadeUp .3s ease both; }
 
     @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        transition-duration: 0.01ms !important;
-      }
+      * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
     }
 
-    /* ── Desktop ── */
     @media (min-width: 640px) {
-      .welcome-title { font-size: 36px; }
-      .quiz-question { font-size: 24px; }
-      .quiz-body { padding: 36px 32px 40px; max-width: 560px; margin: 0 auto; width: 100%; }
-      .results-body { max-width: 560px; margin: 0 auto; width: 100%; }
+      .heading { font-size: 36px; }
+      .q-question { font-size: 24px; }
+      .q-body, .r-body { max-width: 560px; margin: 0 auto; width: 100%; }
     }
   </style>
 </head>
 <body>
-  <div id="app">
 
-    <!-- ═════════ WELCOME ═════════ -->
-    <div id="s-welcome" class="screen active">
-      <div class="top-bar">
-        <span class="top-bar-brand">Garanches</span>
+<div id="offline-banner" class="offline-banner">Mode hors-ligne — vos données seront enregistrées au retour du réseau</div>
+
+<div id="app">
+
+  <!-- ═══ WELCOME ═══ -->
+  <div id="s-welcome" class="screen active">
+    <div class="bar"><span>Garanches</span></div>
+    <div class="page-center">
+      <span class="eyebrow">Après votre visite</span>
+      <h1 class="heading">Testez vos<br>connaissances</h1>
+      <div class="sep"></div>
+      <p class="desc">Vous venez de visiter le Domaine de Garanches. Voyons ce que vous avez retenu de votre découverte du terroir beaujolais.</p>
+      <div class="info-row">
+        <span>10 questions</span>
+        <span>30 s / question</span>
       </div>
-      <div class="welcome">
-        <span class="welcome-eyebrow">Après votre visite</span>
-        <h1 class="welcome-title">Testez vos<br>connaissances</h1>
-        <div class="welcome-line"></div>
-        <p class="welcome-text">
-          Vous venez de visiter le Domaine de Garanches. Voyons ce que vous avez retenu de votre découverte du terroir beaujolais.
-        </p>
-        <div class="welcome-info">
-          <span>10 questions</span>
-          <span>≈ 3 minutes</span>
-        </div>
-        <button class="btn btn-wine btn-full" onclick="start()">Commencer</button>
-      </div>
-      <div class="page-footer">
-        <p>Domaine de Garanches · Depuis 1788 · Odenas</p>
-      </div>
+      <button class="btn btn-w btn-f" onclick="go('s-contact')">Commencer</button>
     </div>
-
-    <!-- ═════════ QUIZ ═════════ -->
-    <div id="s-quiz" class="screen">
-      <div class="top-bar">
-        <span class="top-bar-brand">Garanches</span>
-      </div>
-      <div class="quiz-progress-track">
-        <div id="progress" class="quiz-progress-fill" style="width:0%"></div>
-      </div>
-      <div class="quiz-body">
-        <div class="quiz-meta">
-          <span id="step" class="quiz-step"></span>
-        </div>
-        <h2 id="question" class="quiz-question"></h2>
-        <div id="options" class="quiz-options"></div>
-        <div id="feedback" class="quiz-feedback"></div>
-      </div>
-    </div>
-
-    <!-- ═════════ RESULTS ═════════ -->
-    <div id="s-results" class="screen">
-      <div class="top-bar">
-        <span class="top-bar-brand">Garanches</span>
-      </div>
-      <div class="results-body">
-        <span id="r-eyebrow" class="results-eyebrow"></span>
-        <h2 id="r-heading" class="results-heading"></h2>
-        <div class="results-score-block">
-          <span id="r-score" class="results-score-big">0</span>
-          <span class="results-score-total">/ 10</span>
-        </div>
-        <span class="results-score-label">bonnes réponses</span>
-        <div class="results-line"></div>
-        <p id="r-text" class="results-text"></p>
-        <div class="results-actions">
-          <button class="btn btn-wine btn-full" onclick="restart()">Recommencer</button>
-          <a href="https://garanches.vercel.app/nos-vins" target="_blank" rel="noopener" class="btn btn-outline btn-full">Découvrir nos vins</a>
-        </div>
-        <button id="recap-btn" class="recap-header" onclick="toggleRecap()">
-          Voir le détail des réponses
-          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
-        </button>
-        <div id="recap" class="recap-items"></div>
-      </div>
-      <div class="page-footer">
-        <p>Domaine de Garanches · Depuis 1788 · Odenas</p>
-      </div>
-    </div>
-
+    <div class="foot"><p>Domaine de Garanches · Depuis 1788 · Odenas</p></div>
   </div>
 
+  <!-- ═══ CONTACT ═══ -->
+  <div id="s-contact" class="screen">
+    <div class="bar"><span>Garanches</span></div>
+    <div class="page-center">
+      <span class="eyebrow">Avant de commencer</span>
+      <h2 class="heading">Faisons connaissance</h2>
+      <div class="sep"></div>
+      <p class="desc">Laissez-nous vos coordonnées pour recevoir nos actualités et offres exclusives.</p>
+      <div class="form-group">
+        <label class="form-label" for="f-name">Prénom</label>
+        <input class="form-input" id="f-name" type="text" placeholder="Votre prénom" autocomplete="given-name">
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="f-email">Email</label>
+        <input class="form-input" id="f-email" type="email" placeholder="votre@email.com" autocomplete="email" inputmode="email">
+      </div>
+      <button class="btn btn-w btn-f" id="btn-go" onclick="startQuiz()" style="margin-top: 8px;">Lancer le quiz</button>
+      <button class="form-skip" onclick="startQuiz()">Passer cette étape</button>
+    </div>
+  </div>
+
+  <!-- ═══ QUIZ ═══ -->
+  <div id="s-quiz" class="screen">
+    <div class="bar"><span>Garanches</span></div>
+    <div class="q-progress-track"><div id="progress" class="q-progress-fill" style="width:0%"></div></div>
+    <div class="q-body">
+      <div class="q-meta">
+        <span id="step" class="q-step"></span>
+        <span id="timer" class="q-timer">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/></svg>
+          <span id="timer-txt">30</span>
+        </span>
+      </div>
+      <div class="q-timer-bar"><div id="timer-bar" class="q-timer-fill" style="width:100%"></div></div>
+      <h2 id="question" class="q-question"></h2>
+      <div id="opts" class="q-opts"></div>
+      <div id="fb" class="q-fb"></div>
+    </div>
+  </div>
+
+  <!-- ═══ RESULTS ═══ -->
+  <div id="s-results" class="screen">
+    <div class="bar"><span>Garanches</span></div>
+    <div class="r-body">
+      <span id="r-ey" class="eyebrow"></span>
+      <h2 id="r-hd" class="heading" style="margin-bottom:24px"></h2>
+      <div class="r-score-block">
+        <span id="r-sc" class="r-big">0</span>
+        <span class="r-total">/ 10</span>
+      </div>
+      <span class="r-label">bonnes réponses</span>
+      <div class="sep"></div>
+      <p id="r-tx" class="desc"></p>
+      <div class="r-actions">
+        <button class="btn btn-w btn-f" onclick="restart()">Recommencer</button>
+        <a href="https://garanches.vercel.app/nos-vins" target="_blank" rel="noopener" class="btn btn-o btn-f">Découvrir nos vins</a>
+      </div>
+      <button id="rc-btn" class="rc-btn" onclick="toggleRc()">
+        Voir le détail
+        <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+      </button>
+      <div id="rc-list" class="rc-list"></div>
+    </div>
+    <div class="foot"><p>Domaine de Garanches · Depuis 1788 · Odenas</p></div>
+  </div>
+
+</div>
+
 <script>
-const DATA = [
-  {
-    q: "Depuis quelle année le Domaine de Garanches existe-t-il ?",
-    o: ["1652", "1788", "1824", "1901"],
-    a: 1,
-    e: "Le domaine est ancré à Odenas depuis 1788."
-  },
-  {
-    q: "Dans quelle commune se situe le domaine ?",
-    o: ["Fleurie", "Morgon", "Odenas", "Juliénas"],
-    a: 2,
-    e: "Le domaine se situe à Odenas, au pied du Mont Brouilly."
-  },
-  {
-    q: "Quel est le cépage principal du Brouilly ?",
-    o: ["Pinot Noir", "Syrah", "Gamay Noir", "Merlot"],
-    a: 2,
-    e: "Le Gamay Noir à Jus Blanc est le cépage emblématique du Brouilly."
-  },
-  {
-    q: "Quel cépage compose le Bourgogne Blanc du domaine ?",
-    o: ["Sauvignon Blanc", "Chardonnay", "Viognier", "Riesling"],
-    a: 1,
-    e: "Le Chardonnay est cultivé sur des parcelles argilo-calcaires."
-  },
-  {
-    q: "Au pied de quel mont se trouve le domaine ?",
-    o: ["Mont Ventoux", "Mont Brouilly", "Mont d'Or", "Mont Beaujeu"],
-    a: 1,
-    e: "Le domaine est niché au pied du Mont Brouilly."
-  },
-  {
-    q: "Quelle certification environnementale possède le domaine ?",
-    o: ["Agriculture Biologique", "HVE", "Demeter", "Terra Vitis"],
-    a: 1,
-    e: "Le domaine est certifié HVE — Haute Valeur Environnementale."
-  },
-  {
-    q: "Comment s'appelle le vin pétillant du domaine ?",
-    o: ["Bulles de Garanches", "Amours Pétillantes", "Crémant du Beaujolais", "L'Effervescent"],
-    a: 1,
-    e: "Les Amours Pétillantes sont élaborées en méthode traditionnelle."
-  },
-  {
-    q: "Quel type de vendanges est pratiqué au domaine ?",
-    o: ["Mécaniques", "Manuelles", "Mixtes", "Semi-automatiques"],
-    a: 1,
-    e: "Les vendanges manuelles préservent la qualité des grappes."
-  },
-  {
-    q: "Quel type de sol caractérise le terroir ?",
-    o: ["Calcaire", "Argileux", "Granitique", "Sablonneux"],
-    a: 2,
-    e: "Le sol granitique confère aux vins leur minéralité."
-  },
-  {
-    q: "Quelle est l'exposition des vignes ?",
-    o: ["Nord-Ouest", "Sud-Est", "Plein Sud", "Est"],
-    a: 1,
-    e: "L'exposition Sud-Est offre un ensoleillement idéal."
-  }
+/* ═══════════════════════════════════════
+   QUESTION POOL (25 questions)
+   ═══════════════════════════════════════ */
+const POOL = [
+  { q:"Depuis quelle année le Domaine de Garanches existe-t-il ?", o:["1652","1788","1824","1901"], a:1, e:"Le domaine est ancré à Odenas depuis 1788." },
+  { q:"Dans quelle commune se situe le domaine ?", o:["Fleurie","Morgon","Odenas","Juliénas"], a:2, e:"Le domaine se situe à Odenas, au pied du Mont Brouilly." },
+  { q:"Quel est le cépage principal du Brouilly ?", o:["Pinot Noir","Syrah","Gamay Noir","Merlot"], a:2, e:"Le Gamay Noir à Jus Blanc est le cépage emblématique du Brouilly." },
+  { q:"Quel cépage compose le Bourgogne Blanc ?", o:["Sauvignon Blanc","Chardonnay","Viognier","Riesling"], a:1, e:"Le Chardonnay est cultivé sur des parcelles argilo-calcaires." },
+  { q:"Au pied de quel mont se trouve le domaine ?", o:["Mont Ventoux","Mont Brouilly","Mont d'Or","Mont Beaujeu"], a:1, e:"Le domaine est niché au pied du Mont Brouilly." },
+  { q:"Quelle certification environnementale possède le domaine ?", o:["Agriculture Biologique","HVE","Demeter","Terra Vitis"], a:1, e:"Le domaine est certifié HVE — Haute Valeur Environnementale." },
+  { q:"Comment s'appelle le vin pétillant du domaine ?", o:["Bulles de Garanches","Amours Pétillantes","Crémant du Beaujolais","L'Effervescent"], a:1, e:"Les Amours Pétillantes sont élaborées en méthode traditionnelle." },
+  { q:"Quel type de vendanges est pratiqué au domaine ?", o:["Mécaniques","Manuelles","Mixtes","Semi-automatiques"], a:1, e:"Les vendanges manuelles préservent la qualité des grappes." },
+  { q:"Quel type de sol caractérise le terroir ?", o:["Calcaire","Argileux","Granitique","Sablonneux"], a:2, e:"Le sol granitique confère aux vins leur minéralité." },
+  { q:"Quelle est l'exposition des vignes ?", o:["Nord-Ouest","Sud-Est","Plein Sud","Est"], a:1, e:"L'exposition Sud-Est offre un ensoleillement idéal." },
+  { q:"Quelle est l'appellation principale du domaine ?", o:["Beaujolais-Villages","Côtes du Rhône","Brouilly","Saint-Amour"], a:2, e:"Le Brouilly est l'un des 10 crus du Beaujolais." },
+  { q:"Dans quel département se situe Odenas ?", o:["Ain","Saône-et-Loire","Rhône","Loire"], a:2, e:"Odenas est situé dans le département du Rhône (69)." },
+  { q:"Quel est le code postal d'Odenas ?", o:["69460","69220","69820","69380"], a:0, e:"Odenas a pour code postal 69460." },
+  { q:"Quel type de sol accueille les vignes de Chardonnay ?", o:["Granitique","Argilo-calcaire","Volcanique","Schisteux"], a:1, e:"Le Chardonnay s'épanouit sur des parcelles argilo-calcaires." },
+  { q:"Le Gamay Noir est aussi appelé Gamay Noir à Jus…", o:["Rouge","Blanc","Rosé","Doré"], a:1, e:"Le nom complet est Gamay Noir à Jus Blanc." },
+  { q:"Quelle méthode est utilisée pour le vin pétillant ?", o:["Charmat","Traditionnelle","Ancestrale","Dioise"], a:1, e:"Les Amours Pétillantes sont en méthode traditionnelle." },
+  { q:"Quelle pratique est favorisée pour les sols ?", o:["Labourage profond","Enherbement","Désherbage chimique","Bâchage"], a:1, e:"L'enherbement des rangs préserve la biodiversité et la vie des sols." },
+  { q:"Quelle couleur de robe caractérise le Brouilly ?", o:["Jaune paille","Or ambré","Rubis profond","Grenat pâle"], a:2, e:"Le Brouilly présente une robe rubis profond." },
+  { q:"Quels arômes trouve-t-on dans le Brouilly ?", o:["Agrumes et vanille","Fraise et framboise","Pomme et poire","Cerise et chocolat"], a:1, e:"Le Brouilly offre des arômes de fraise, framboise et cassis." },
+  { q:"Quel caractère donne la Côte de Brouilly par rapport au Brouilly ?", o:["Plus fruité","Plus minéral","Plus sucré","Plus léger"], a:1, e:"La Côte de Brouilly offre une structure plus minérale." },
+  { q:"Combien de crus compte l'appellation Beaujolais ?", o:["5","8","10","12"], a:2, e:"Le Beaujolais compte 10 crus, dont Brouilly et Côte de Brouilly." },
+  { q:"Quelle est la couleur du rosé Beaujolais-Villages du domaine ?", o:["Rose vif","Rose saumoné","Framboise","Pelure d'oignon"], a:1, e:"Le rosé présente une robe aux reflets rose saumoné." },
+  { q:"Quel est le statut du domaine ?", o:["Coopérative","Négoce","Vignerons indépendants","Cave particulière"], a:2, e:"Le Domaine de Garanches est une exploitation de vignerons indépendants." },
+  { q:"Le Bourgogne Blanc présente des notes de…", o:["Fruits rouges et épices","Agrumes et fleurs blanches","Beurre et noisette","Miel et abricot"], a:1, e:"Le Bourgogne Blanc offre des notes d'agrumes et de fleurs blanches." },
+  { q:"Quelle est l'adresse du domaine ?", o:["12 route des Vignes","345 chemin de Garanches","1 place du Village","200 montée du Brouilly"], a:1, e:"Le domaine est au 345 chemin de Garanches, Odenas." }
 ];
 
-let cur = 0, score = 0, answers = [], locked = false;
-const letters = ['A', 'B', 'C', 'D'];
+const TOTAL = 10;
+const TIMER_SECONDS = 30;
+const LETTERS = ['A','B','C','D'];
 
-function show(id) {
+let quizData = [];
+let cur = 0, score = 0, answers = [], locked = false;
+let timerInterval = null, timerRemaining = TIMER_SECONDS;
+
+/* ── Screen nav ── */
+function go(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
 
-function start() {
+/* ── Shuffle & pick ── */
+function pickQuestions() {
+  const shuffled = [...POOL].sort(() => Math.random() - 0.5);
+  quizData = shuffled.slice(0, TOTAL);
+}
+
+/* ── Contact save ── */
+function saveContact() {
+  const name = document.getElementById('f-name').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  if (name || email) {
+    const contacts = JSON.parse(localStorage.getItem('garanches_contacts') || '[]');
+    contacts.push({ name, email, date: new Date().toISOString() });
+    localStorage.setItem('garanches_contacts', JSON.stringify(contacts));
+  }
+}
+
+/* ── Start ── */
+function startQuiz() {
+  saveContact();
+  pickQuestions();
   cur = 0; score = 0; answers = []; locked = false;
-  show('s-quiz');
+  go('s-quiz');
   render();
 }
 
+/* ── Render question ── */
 function render() {
   locked = false;
-  const d = DATA[cur], n = DATA.length;
-  document.getElementById('progress').style.width = ((cur) / n * 100) + '%';
-  document.getElementById('step').innerHTML = 'Question <strong>' + (cur + 1) + '</strong> sur ' + n;
-  document.getElementById('question').textContent = d.q;
-  document.getElementById('question').className = 'quiz-question fade-up';
+  const d = quizData[cur], n = TOTAL;
 
-  const box = document.getElementById('options');
-  box.innerHTML = d.o.map((t, i) =>
-    '<button class="option fade-up" style="animation-delay:' + (i * 0.05) + 's" onclick="pick(' + i + ')">' +
-      '<span class="option-marker">' + letters[i] + '</span>' +
-      '<span class="option-label">' + t + '</span>' +
+  document.getElementById('progress').style.width = (cur / n * 100) + '%';
+  document.getElementById('step').innerHTML = 'Question <strong>' + (cur + 1) + '</strong> sur ' + n;
+
+  const qEl = document.getElementById('question');
+  qEl.textContent = d.q;
+  qEl.className = 'q-question fu';
+
+  document.getElementById('opts').innerHTML = d.o.map((t, i) =>
+    '<button class="opt fu" style="animation-delay:' + (i * .04) + 's" onclick="pick(' + i + ')">' +
+      '<span class="opt-m">' + LETTERS[i] + '</span>' +
+      '<span class="opt-t">' + t + '</span>' +
     '</button>'
   ).join('');
 
-  const fb = document.getElementById('feedback');
-  fb.className = 'quiz-feedback';
+  const fb = document.getElementById('fb');
+  fb.className = 'q-fb';
   fb.textContent = '';
+
+  startTimer();
 }
 
-function pick(i) {
+/* ── Timer ── */
+function startTimer() {
+  clearInterval(timerInterval);
+  timerRemaining = TIMER_SECONDS;
+  updateTimerDisplay();
+
+  const timerEl = document.getElementById('timer');
+  const barEl = document.getElementById('timer-bar');
+  timerEl.classList.remove('warn');
+  barEl.classList.remove('warn');
+  barEl.style.width = '100%';
+
+  timerInterval = setInterval(() => {
+    timerRemaining--;
+    updateTimerDisplay();
+
+    const pct = (timerRemaining / TIMER_SECONDS) * 100;
+    barEl.style.width = pct + '%';
+
+    if (timerRemaining <= 10) {
+      timerEl.classList.add('warn');
+      barEl.classList.add('warn');
+    }
+
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      timeUp();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  document.getElementById('timer-txt').textContent = timerRemaining;
+}
+
+function timeUp() {
   if (locked) return;
   locked = true;
 
-  const d = DATA[cur];
-  const ok = i === d.a;
-  if (ok) score++;
-  answers.push({ i: cur, pick: i, ok: ok });
+  const d = quizData[cur];
+  answers.push({ i: cur, pick: -1, ok: false });
 
-  const btns = document.querySelectorAll('.option');
+  const btns = document.querySelectorAll('.opt');
   btns.forEach((b, idx) => {
-    b.classList.add('locked');
-    if (idx === i && ok) b.classList.add('is-correct');
-    if (idx === i && !ok) b.classList.add('is-wrong');
-    if (idx === d.a && !ok) b.classList.add('is-reveal');
+    b.classList.add('lk');
+    if (idx === d.a) b.classList.add('rv');
   });
 
-  const fb = document.getElementById('feedback');
-  fb.textContent = ok ? 'Bonne réponse.' : d.e;
-  fb.className = 'quiz-feedback show ' + (ok ? 'ok' : 'ko');
+  const fb = document.getElementById('fb');
+  fb.textContent = 'Temps écoulé. ' + d.e;
+  fb.className = 'q-fb show is-ko';
 
   setTimeout(() => {
-    if (cur < DATA.length - 1) { cur++; render(); }
+    if (cur < TOTAL - 1) { cur++; render(); }
+    else results();
+  }, 2000);
+}
+
+/* ── Pick answer ── */
+function pick(i) {
+  if (locked) return;
+  locked = true;
+  clearInterval(timerInterval);
+
+  const d = quizData[cur];
+  const ok = i === d.a;
+  if (ok) score++;
+  answers.push({ i: cur, pick: i, ok });
+
+  const btns = document.querySelectorAll('.opt');
+  btns.forEach((b, idx) => {
+    b.classList.add('lk');
+    if (idx === i && ok) b.classList.add('ok');
+    if (idx === i && !ok) b.classList.add('ko');
+    if (idx === d.a && !ok) b.classList.add('rv');
+  });
+
+  const fb = document.getElementById('fb');
+  fb.textContent = ok ? 'Bonne réponse.' : d.e;
+  fb.className = 'q-fb show ' + (ok ? 'is-ok' : 'is-ko');
+
+  setTimeout(() => {
+    if (cur < TOTAL - 1) { cur++; render(); }
     else results();
   }, ok ? 1000 : 2000);
 }
 
+/* ── Results ── */
 function results() {
-  show('s-results');
+  clearInterval(timerInterval);
+  go('s-results');
   document.getElementById('progress').style.width = '100%';
 
-  const pct = score / DATA.length;
-  let eyebrow, heading, text;
+  const pct = score / TOTAL;
+  let ey, hd, tx;
 
-  if (pct >= 0.9) {
-    eyebrow = 'Félicitations';
-    heading = 'Vous êtes incollable';
-    text = 'Vous maîtrisez parfaitement l\'histoire et le terroir du Domaine de Garanches. Vous méritez une dégustation de notre Côte de Brouilly.';
-  } else if (pct >= 0.7) {
-    eyebrow = 'Très bien';
-    heading = 'Belles connaissances';
-    text = 'Vous avez bien retenu les détails de votre visite. Encore un petit effort pour atteindre la perfection.';
-  } else if (pct >= 0.5) {
-    eyebrow = 'Pas mal';
-    heading = 'De bonnes bases';
-    text = 'Vous connaissez les fondamentaux du domaine. Une prochaine visite vous permettra d\'approfondir.';
+  if (pct >= .9) {
+    ey = 'Félicitations'; hd = 'Vous êtes incollable';
+    tx = 'Vous maîtrisez parfaitement l\'histoire et le terroir du Domaine de Garanches.';
+  } else if (pct >= .7) {
+    ey = 'Très bien'; hd = 'Belles connaissances';
+    tx = 'Vous avez bien retenu les détails de votre visite. Encore un petit effort pour la perfection.';
+  } else if (pct >= .5) {
+    ey = 'Pas mal'; hd = 'De bonnes bases';
+    tx = 'Vous connaissez les fondamentaux. Une prochaine visite vous permettra d\'approfondir.';
   } else {
-    eyebrow = 'À approfondir';
-    heading = 'Il reste à découvrir';
-    text = 'Le Domaine de Garanches a encore beaucoup de secrets à vous révéler. N\'hésitez pas à revenir nous voir.';
+    ey = 'À approfondir'; hd = 'Il reste à découvrir';
+    tx = 'Le domaine a encore beaucoup de secrets à vous révéler. N\'hésitez pas à revenir.';
   }
 
-  document.getElementById('r-eyebrow').textContent = eyebrow;
-  document.getElementById('r-heading').textContent = heading;
-  document.getElementById('r-text').textContent = text;
+  document.getElementById('r-ey').textContent = ey;
+  document.getElementById('r-hd').textContent = hd;
+  document.getElementById('r-tx').textContent = tx;
 
-  // Animate score
-  const el = document.getElementById('r-score');
+  const el = document.getElementById('r-sc');
   let n = 0;
   const iv = setInterval(() => { n++; el.textContent = n; if (n >= score) clearInterval(iv); }, 80);
 
-  // Recap
-  document.getElementById('recap').innerHTML = answers.map((a, idx) => {
-    const d = DATA[a.i];
-    const aText = a.ok
-      ? '<strong>' + d.o[a.pick] + '</strong>'
-      : '<span class="wrong">' + d.o[a.pick] + '</span> → <strong>' + d.o[d.a] + '</strong>';
-    return '<div class="recap-card ' + (a.ok ? 'ok' : 'ko') + '">' +
-      '<div class="recap-card-q">' + (idx + 1) + '. ' + d.q + '</div>' +
-      '<div class="recap-card-a">' + aText + '</div>' +
-    '</div>';
+  document.getElementById('rc-list').innerHTML = answers.map((a, idx) => {
+    const d = quizData[a.i];
+    let aHtml;
+    if (a.pick === -1) {
+      aHtml = '<span class="w">Temps écoulé</span> → <strong>' + d.o[d.a] + '</strong>';
+    } else if (a.ok) {
+      aHtml = '<strong>' + d.o[a.pick] + '</strong>';
+    } else {
+      aHtml = '<span class="w">' + d.o[a.pick] + '</span> → <strong>' + d.o[d.a] + '</strong>';
+    }
+    return '<div class="rc-card ' + (a.ok ? 'is-ok' : 'is-ko') + '">' +
+      '<div class="rc-q">' + (idx + 1) + '. ' + d.q + '</div>' +
+      '<div class="rc-a">' + aHtml + '</div></div>';
   }).join('');
 
-  document.getElementById('recap-btn').classList.remove('open');
-  document.getElementById('recap').classList.remove('show');
+  document.getElementById('rc-btn').classList.remove('open');
+  document.getElementById('rc-list').classList.remove('show');
 }
 
-function toggleRecap() {
-  document.getElementById('recap-btn').classList.toggle('open');
-  document.getElementById('recap').classList.toggle('show');
+function toggleRc() {
+  document.getElementById('rc-btn').classList.toggle('open');
+  document.getElementById('rc-list').classList.toggle('show');
 }
 
-function restart() {
-  start();
+function restart() { go('s-welcome'); }
+
+/* ── Offline detection ── */
+function updateOnlineStatus() {
+  document.getElementById('offline-banner').classList.toggle('show', !navigator.onLine);
+}
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+updateOnlineStatus();
+
+/* ── PWA Service Worker ── */
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').catch(() => {});
 }
 </script>
 </body>
