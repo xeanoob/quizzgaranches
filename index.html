@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Quiz — Domaine de Garanches</title>
+  <meta name="description" content="Testez vos connaissances sur le Domaine de Garanches après votre visite. Quiz interactif sur les vins de Brouilly et le terroir d'Odenas.">
+  <meta name="theme-color" content="#fafaf9">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --wine: #7f1d1d;
+      --wine-light: #991b1b;
+      --gold: #b45309;
+      --gold-light: #d97706;
+      --stone-50: #fafaf9;
+      --stone-100: #f5f5f4;
+      --stone-200: #e7e5e4;
+      --stone-300: #d6d3d1;
+      --stone-400: #a8a29e;
+      --stone-500: #78716c;
+      --stone-600: #57534e;
+      --stone-700: #44403c;
+      --stone-800: #292524;
+      --stone-900: #1c1917;
+      --correct: #166534;
+      --correct-bg: #f0fdf4;
+      --correct-border: #bbf7d0;
+      --incorrect: #991b1b;
+      --incorrect-bg: #fef2f2;
+      --incorrect-border: #fecaca;
+      --serif: 'Playfair Display', Georgia, serif;
+      --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      font-family: var(--sans);
+      background: var(--stone-50);
+      color: var(--stone-900);
+      min-height: 100dvh;
+      overscroll-behavior: none;
+      touch-action: manipulation;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    ::selection { background: var(--wine); color: white; }
+
+    /* ── Layout ── */
+    #app {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .screen.active { display: flex; opacity: 1; }
+
+    /* ── Header Bar ── */
+    .top-bar {
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--stone-200);
+      background: white;
+    }
+
+    .top-bar-brand {
+      font-family: var(--serif);
+      font-size: 13px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--stone-900);
+    }
+
+    /* ═══════════════════════════════════════
+       WELCOME
+       ═══════════════════════════════════════ */
+    .welcome {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 28px 48px;
+      text-align: center;
+    }
+
+    .welcome-eyebrow {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 15px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+
+    .welcome-title {
+      font-family: var(--serif);
+      font-size: 30px;
+      font-weight: 500;
+      color: var(--stone-900);
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
+
+    .welcome-line {
+      width: 48px;
+      height: 1px;
+      background: var(--stone-300);
+      margin: 0 auto 24px;
+    }
+
+    .welcome-text {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--stone-500);
+      max-width: 320px;
+      margin-bottom: 36px;
+    }
+
+    .welcome-info {
+      display: flex;
+      gap: 32px;
+      margin-bottom: 40px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      color: var(--stone-400);
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px 40px;
+      border-radius: 999px;
+      font-family: var(--sans);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+      min-height: 52px;
+      text-decoration: none;
+    }
+
+    .btn-wine {
+      background: var(--wine);
+      color: white;
+    }
+    .btn-wine:active { background: var(--wine-light); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--stone-900);
+      border: 1px solid var(--stone-300);
+    }
+    .btn-outline:active { background: var(--stone-100); }
+
+    .btn-full { width: 100%; max-width: 320px; }
+
+    /* ── Footer ── */
+    .page-footer {
+      padding: 24px;
+      text-align: center;
+      border-top: 1px solid var(--stone-200);
+    }
+
+    .page-footer p {
+      font-size: 11px;
+      color: var(--stone-400);
+      letter-spacing: 0.05em;
+    }
+
+    /* ═══════════════════════════════════════
+       QUIZ
+       ═══════════════════════════════════════ */
+    .quiz-progress-track {
+      width: 100%;
+      height: 2px;
+      background: var(--stone-200);
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: var(--wine);
+      transition: width 0.5s ease;
+    }
+
+    .quiz-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 28px 24px 32px;
+    }
+
+    .quiz-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .quiz-step {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      color: var(--stone-400);
+    }
+
+    .quiz-step strong {
+      color: var(--stone-900);
+      font-weight: 600;
+    }
+
+    .quiz-question {
+      font-family: var(--serif);
+      font-size: 21px;
+      font-weight: 400;
+      line-height: 1.45;
+      color: var(--stone-900);
+      margin-bottom: 32px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .option {
+      width: 100%;
+      padding: 16px 20px;
+      background: white;
+      border: 1px solid var(--stone-200);
+      border-radius: 10px;
+      font-family: var(--sans);
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--stone-800);
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .option:active:not(.locked) {
+      background: var(--stone-100);
+      border-color: var(--stone-300);
+    }
+
+    .option-marker {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1.5px solid var(--stone-300);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--stone-400);
+      flex-shrink: 0;
+      transition: all 0.25s ease;
+    }
+
+    .option-label { flex: 1; }
+
+    /* States */
+    .option.is-correct {
+      background: var(--correct-bg);
+      border-color: var(--correct-border);
+      color: var(--correct);
+    }
+    .option.is-correct .option-marker {
+      background: var(--correct);
+      border-color: var(--correct);
+      color: white;
+    }
+
+    .option.is-wrong {
+      background: var(--incorrect-bg);
+      border-color: var(--incorrect-border);
+      color: var(--incorrect);
+    }
+    .option.is-wrong .option-marker {
+      background: var(--incorrect);
+      border-color: var(--incorrect);
+      color: white;
+    }
+
+    .option.is-reveal {
+      background: var(--correct-bg);
+      border-color: var(--correct-border);
+      color: var(--correct);
+    }
+    .option.is-reveal .option-marker {
+      border-color: var(--correct);
+      color: var(--correct);
+    }
+
+    .option.locked { pointer-events: none; }
+    .option.locked:not(.is-correct):not(.is-wrong):not(.is-reveal) {
+      opacity: 0.4;
+    }
+
+    .quiz-feedback {
+      margin-top: 16px;
+      padding: 14px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 400;
+      line-height: 1.6;
+      display: none;
+    }
+
+    .quiz-feedback.show { display: block; }
+
+    .quiz-feedback.ok {
+      background: var(--correct-bg);
+      border: 1px solid var(--correct-border);
+      color: var(--correct);
+    }
+
+    .quiz-feedback.ko {
+      background: var(--incorrect-bg);
+      border: 1px solid var(--incorrect-border);
+      color: var(--incorrect);
+    }
+
+    /* ═══════════════════════════════════════
+       RESULTS
+       ═══════════════════════════════════════ */
+    .results-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 28px 32px;
+    }
+
+    .results-eyebrow {
+      font-family: var(--serif);
+      font-style: italic;
+      font-size: 15px;
+      color: var(--gold);
+      margin-bottom: 8px;
+    }
+
+    .results-heading {
+      font-family: var(--serif);
+      font-size: 28px;
+      font-weight: 500;
+      color: var(--stone-900);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .results-score-block {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+
+    .results-score-big {
+      font-family: var(--serif);
+      font-size: 64px;
+      font-weight: 500;
+      color: var(--wine);
+      line-height: 1;
+    }
+
+    .results-score-total {
+      font-family: var(--serif);
+      font-size: 24px;
+      color: var(--stone-400);
+      font-weight: 400;
+    }
+
+    .results-score-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      color: var(--stone-400);
+      margin-bottom: 28px;
+    }
+
+    .results-line {
+      width: 48px;
+      height: 1px;
+      background: var(--stone-300);
+      margin-bottom: 24px;
+    }
+
+    .results-text {
+      font-size: 14px;
+      font-weight: 300;
+      line-height: 1.8;
+      color: var(--stone-500);
+      text-align: center;
+      max-width: 320px;
+      margin-bottom: 36px;
+    }
+
+    .results-actions {
+      width: 100%;
+      max-width: 320px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 36px;
+    }
+
+    /* ── Recap ── */
+    .recap-header {
+      width: 100%;
+      max-width: 380px;
+      padding: 14px 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-family: var(--sans);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      font-weight: 600;
+      color: var(--stone-500);
+      border-top: 1px solid var(--stone-200);
+    }
+
+    .recap-header svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--stone-400);
+      transition: transform 0.25s ease;
+    }
+
+    .recap-header.open svg { transform: rotate(180deg); }
+
+    .recap-items {
+      width: 100%;
+      max-width: 380px;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+      padding: 8px 0 16px;
+    }
+
+    .recap-items.show { display: flex; }
+
+    .recap-card {
+      padding: 14px 16px;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid var(--stone-200);
+      border-left: 3px solid;
+    }
+
+    .recap-card.ok { border-left-color: var(--correct); }
+    .recap-card.ko { border-left-color: var(--incorrect); }
+
+    .recap-card-q {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--stone-700);
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .recap-card-a {
+      font-size: 12px;
+      color: var(--stone-400);
+      line-height: 1.4;
+    }
+
+    .recap-card-a strong { color: var(--correct); font-weight: 600; }
+    .recap-card-a .wrong { color: var(--incorrect); }
+
+    /* ── Animations ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .fade-up { animation: fadeUp 0.35s ease both; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* ── Desktop ── */
+    @media (min-width: 640px) {
+      .welcome-title { font-size: 36px; }
+      .quiz-question { font-size: 24px; }
+      .quiz-body { padding: 36px 32px 40px; max-width: 560px; margin: 0 auto; width: 100%; }
+      .results-body { max-width: 560px; margin: 0 auto; width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ═════════ WELCOME ═════════ -->
+    <div id="s-welcome" class="screen active">
+      <div class="top-bar">
+        <span class="top-bar-brand">Garanches</span>
+      </div>
+      <div class="welcome">
+        <span class="welcome-eyebrow">Après votre visite</span>
+        <h1 class="welcome-title">Testez vos<br>connaissances</h1>
+        <div class="welcome-line"></div>
+        <p class="welcome-text">
+          Vous venez de visiter le Domaine de Garanches. Voyons ce que vous avez retenu de votre découverte du terroir beaujolais.
+        </p>
+        <div class="welcome-info">
+          <span>10 questions</span>
+          <span>≈ 3 minutes</span>
+        </div>
+        <button class="btn btn-wine btn-full" onclick="start()">Commencer</button>
+      </div>
+      <div class="page-footer">
+        <p>Domaine de Garanches · Depuis 1788 · Odenas</p>
+      </div>
+    </div>
+
+    <!-- ═════════ QUIZ ═════════ -->
+    <div id="s-quiz" class="screen">
+      <div class="top-bar">
+        <span class="top-bar-brand">Garanches</span>
+      </div>
+      <div class="quiz-progress-track">
+        <div id="progress" class="quiz-progress-fill" style="width:0%"></div>
+      </div>
+      <div class="quiz-body">
+        <div class="quiz-meta">
+          <span id="step" class="quiz-step"></span>
+        </div>
+        <h2 id="question" class="quiz-question"></h2>
+        <div id="options" class="quiz-options"></div>
+        <div id="feedback" class="quiz-feedback"></div>
+      </div>
+    </div>
+
+    <!-- ═════════ RESULTS ═════════ -->
+    <div id="s-results" class="screen">
+      <div class="top-bar">
+        <span class="top-bar-brand">Garanches</span>
+      </div>
+      <div class="results-body">
+        <span id="r-eyebrow" class="results-eyebrow"></span>
+        <h2 id="r-heading" class="results-heading"></h2>
+        <div class="results-score-block">
+          <span id="r-score" class="results-score-big">0</span>
+          <span class="results-score-total">/ 10</span>
+        </div>
+        <span class="results-score-label">bonnes réponses</span>
+        <div class="results-line"></div>
+        <p id="r-text" class="results-text"></p>
+        <div class="results-actions">
+          <button class="btn btn-wine btn-full" onclick="restart()">Recommencer</button>
+          <a href="https://garanches.vercel.app/nos-vins" target="_blank" rel="noopener" class="btn btn-outline btn-full">Découvrir nos vins</a>
+        </div>
+        <button id="recap-btn" class="recap-header" onclick="toggleRecap()">
+          Voir le détail des réponses
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5"/></svg>
+        </button>
+        <div id="recap" class="recap-items"></div>
+      </div>
+      <div class="page-footer">
+        <p>Domaine de Garanches · Depuis 1788 · Odenas</p>
+      </div>
+    </div>
+
+  </div>
+
+<script>
+const DATA = [
+  {
+    q: "Depuis quelle année le Domaine de Garanches existe-t-il ?",
+    o: ["1652", "1788", "1824", "1901"],
+    a: 1,
+    e: "Le domaine est ancré à Odenas depuis 1788."
+  },
+  {
+    q: "Dans quelle commune se situe le domaine ?",
+    o: ["Fleurie", "Morgon", "Odenas", "Juliénas"],
+    a: 2,
+    e: "Le domaine se situe à Odenas, au pied du Mont Brouilly."
+  },
+  {
+    q: "Quel est le cépage principal du Brouilly ?",
+    o: ["Pinot Noir", "Syrah", "Gamay Noir", "Merlot"],
+    a: 2,
+    e: "Le Gamay Noir à Jus Blanc est le cépage emblématique du Brouilly."
+  },
+  {
+    q: "Quel cépage compose le Bourgogne Blanc du domaine ?",
+    o: ["Sauvignon Blanc", "Chardonnay", "Viognier", "Riesling"],
+    a: 1,
+    e: "Le Chardonnay est cultivé sur des parcelles argilo-calcaires."
+  },
+  {
+    q: "Au pied de quel mont se trouve le domaine ?",
+    o: ["Mont Ventoux", "Mont Brouilly", "Mont d'Or", "Mont Beaujeu"],
+    a: 1,
+    e: "Le domaine est niché au pied du Mont Brouilly."
+  },
+  {
+    q: "Quelle certification environnementale possède le domaine ?",
+    o: ["Agriculture Biologique", "HVE", "Demeter", "Terra Vitis"],
+    a: 1,
+    e: "Le domaine est certifié HVE — Haute Valeur Environnementale."
+  },
+  {
+    q: "Comment s'appelle le vin pétillant du domaine ?",
+    o: ["Bulles de Garanches", "Amours Pétillantes", "Crémant du Beaujolais", "L'Effervescent"],
+    a: 1,
+    e: "Les Amours Pétillantes sont élaborées en méthode traditionnelle."
+  },
+  {
+    q: "Quel type de vendanges est pratiqué au domaine ?",
+    o: ["Mécaniques", "Manuelles", "Mixtes", "Semi-automatiques"],
+    a: 1,
+    e: "Les vendanges manuelles préservent la qualité des grappes."
+  },
+  {
+    q: "Quel type de sol caractérise le terroir ?",
+    o: ["Calcaire", "Argileux", "Granitique", "Sablonneux"],
+    a: 2,
+    e: "Le sol granitique confère aux vins leur minéralité."
+  },
+  {
+    q: "Quelle est l'exposition des vignes ?",
+    o: ["Nord-Ouest", "Sud-Est", "Plein Sud", "Est"],
+    a: 1,
+    e: "L'exposition Sud-Est offre un ensoleillement idéal."
+  }
+];
+
+let cur = 0, score = 0, answers = [], locked = false;
+const letters = ['A', 'B', 'C', 'D'];
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function start() {
+  cur = 0; score = 0; answers = []; locked = false;
+  show('s-quiz');
+  render();
+}
+
+function render() {
+  locked = false;
+  const d = DATA[cur], n = DATA.length;
+  document.getElementById('progress').style.width = ((cur) / n * 100) + '%';
+  document.getElementById('step').innerHTML = 'Question <strong>' + (cur + 1) + '</strong> sur ' + n;
+  document.getElementById('question').textContent = d.q;
+  document.getElementById('question').className = 'quiz-question fade-up';
+
+  const box = document.getElementById('options');
+  box.innerHTML = d.o.map((t, i) =>
+    '<button class="option fade-up" style="animation-delay:' + (i * 0.05) + 's" onclick="pick(' + i + ')">' +
+      '<span class="option-marker">' + letters[i] + '</span>' +
+      '<span class="option-label">' + t + '</span>' +
+    '</button>'
+  ).join('');
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'quiz-feedback';
+  fb.textContent = '';
+}
+
+function pick(i) {
+  if (locked) return;
+  locked = true;
+
+  const d = DATA[cur];
+  const ok = i === d.a;
+  if (ok) score++;
+  answers.push({ i: cur, pick: i, ok: ok });
+
+  const btns = document.querySelectorAll('.option');
+  btns.forEach((b, idx) => {
+    b.classList.add('locked');
+    if (idx === i && ok) b.classList.add('is-correct');
+    if (idx === i && !ok) b.classList.add('is-wrong');
+    if (idx === d.a && !ok) b.classList.add('is-reveal');
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.textContent = ok ? 'Bonne réponse.' : d.e;
+  fb.className = 'quiz-feedback show ' + (ok ? 'ok' : 'ko');
+
+  setTimeout(() => {
+    if (cur < DATA.length - 1) { cur++; render(); }
+    else results();
+  }, ok ? 1000 : 2000);
+}
+
+function results() {
+  show('s-results');
+  document.getElementById('progress').style.width = '100%';
+
+  const pct = score / DATA.length;
+  let eyebrow, heading, text;
+
+  if (pct >= 0.9) {
+    eyebrow = 'Félicitations';
+    heading = 'Vous êtes incollable';
+    text = 'Vous maîtrisez parfaitement l\'histoire et le terroir du Domaine de Garanches. Vous méritez une dégustation de notre Côte de Brouilly.';
+  } else if (pct >= 0.7) {
+    eyebrow = 'Très bien';
+    heading = 'Belles connaissances';
+    text = 'Vous avez bien retenu les détails de votre visite. Encore un petit effort pour atteindre la perfection.';
+  } else if (pct >= 0.5) {
+    eyebrow = 'Pas mal';
+    heading = 'De bonnes bases';
+    text = 'Vous connaissez les fondamentaux du domaine. Une prochaine visite vous permettra d\'approfondir.';
+  } else {
+    eyebrow = 'À approfondir';
+    heading = 'Il reste à découvrir';
+    text = 'Le Domaine de Garanches a encore beaucoup de secrets à vous révéler. N\'hésitez pas à revenir nous voir.';
+  }
+
+  document.getElementById('r-eyebrow').textContent = eyebrow;
+  document.getElementById('r-heading').textContent = heading;
+  document.getElementById('r-text').textContent = text;
+
+  // Animate score
+  const el = document.getElementById('r-score');
+  let n = 0;
+  const iv = setInterval(() => { n++; el.textContent = n; if (n >= score) clearInterval(iv); }, 80);
+
+  // Recap
+  document.getElementById('recap').innerHTML = answers.map((a, idx) => {
+    const d = DATA[a.i];
+    const aText = a.ok
+      ? '<strong>' + d.o[a.pick] + '</strong>'
+      : '<span class="wrong">' + d.o[a.pick] + '</span> → <strong>' + d.o[d.a] + '</strong>';
+    return '<div class="recap-card ' + (a.ok ? 'ok' : 'ko') + '">' +
+      '<div class="recap-card-q">' + (idx + 1) + '. ' + d.q + '</div>' +
+      '<div class="recap-card-a">' + aText + '</div>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('recap-btn').classList.remove('open');
+  document.getElementById('recap').classList.remove('show');
+}
+
+function toggleRecap() {
+  document.getElementById('recap-btn').classList.toggle('open');
+  document.getElementById('recap').classList.toggle('show');
+}
+
+function restart() {
+  start();
+}
+</script>
+</body>
+</html>
